@@ -1,0 +1,26 @@
+{
+  "name": "cozanet-multimodal",
+  "version": "1.0.0",
+  "description": "Multi-modal processing engine using Groq vision models and local utilities.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "groq-sdk": "^0.13.0",
+    "sharp": "^0.33.5",
+    "pdf-parse": "^1.1.1",
+    "mammoth": "^1.8.0",
+    "zod": "^3.23.8",
+    "pino": "^9.2.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3",
+    "@types/node": "^20.14.9",
+    "@types/pdf-parse": "^1.1.4",
+    "@types/uuid": "^10.0.0"
+  }
+}
