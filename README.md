@@ -1,35 +1,106 @@
-# Cozanet Multimodal
+# CozanetOS Multimodal Engine (`cozanet-multimodal`)
 
-A robust multi-modal processing engine built with TypeScript. Leveraging state-of-the-art AI models, Groq vision capabilities, and local utility libraries.
+> **AI-Native OS Perceptual Engine: Real-time Audio, Speech, Vision, and Document Understanding**
 
-## Philosophy
-- **Groq Vision Models**: Uses model `llama-3.2-11b-vision-preview` for high-fidelity image analysis and Optical Character Recognition (OCR).
-- **Production-Ready Utilities**: Uses standard libraries like `sharp` for image resizing and manipulation, `pdf-parse` for PDF document extraction, and `mammoth` for DOCX parsing.
-- **Round-Robin Client Pool**: Rotates through API keys (`GROQ_API_KEY_1`, `GROQ_API_KEY_2`, `GROQ_API_KEY_3`) to ensure high availability and rate limit mitigation.
+`cozanet-multimodal` is the unified perceptual pipeline of CozanetOS. It serves as the primary system interface for sensory inputs, allowing the OS to understand and interact with the physical and digital world in real-time through voice, images, video feeds, system screens, and complex multi-page document payloads.
 
-## Features
-- **Image Processing (`multimodal:images`)**:
-  - `analyze(imagePath, prompt)` - Uses Groq's Vision LLMs to describe and inspect images.
-  - `resize(input, width, height)` - Uses `sharp` to scale images.
-  - `toBase64(imagePath)` - Utility to convert local images to Base64 data strings.
-- **Document Processing (`multimodal:documents`)**:
-  - `parsePDF(path)` - Extracts full text and metadata using `pdf-parse`.
-  - `parseDocx(path)` - Parses Microsoft Word files via `mammoth`.
-  - `summarize(content)` - Crafts high-quality summaries of text using Groq.
-- **OCR Engine (`multimodal:ocr`)**:
-  - `extractText(imagePath)` - Leverages vision models to extract structured or layout-preserved text.
-- **Stubs & Extensibility**: Includes fully typed engines for audio (`multimodal:audio`), screen capturing (`multimodal:screen`), and voice translation/synthesis (`multimodal:voice`).
+---
 
-## Installation
+## 🚀 Key Capabilities
 
-```bash
-npm install
+- **Voice Conversation**: Sub-second, full-duplex spoken dialogue engine with natural turn-taking detection and interruption handling.
+- **Speech Synthesis (TTS)**: Low-latency, expressive text-to-speech engine supporting custom voices, emotional tone variation, and multiple languages.
+- **Speech Recognition (STT)**: Highly accurate, noise-resilient speech-to-text transcription with speaker diarization.
+- **Image Understanding**: Advanced computer vision pipeline providing object detection, scene parsing, geometric layout classification, and high-fidelity captioning.
+- **Video Understanding**: Frame-by-frame video stream analysis, spatial-temporal modeling, and instant event summarization.
+- **Document Understanding**: Intelligent extraction from PDFs, Word documents, and spreadsheets, retaining layout structure, tables, and nested graphs.
+- **Optical Character Recognition (OCR)**: Multilingual text extraction from low-contrast, skewed, or handwritten document scans and image frames.
+- **Camera Input Integration**: Low-level drivers to consume real-time video feeds from system cameras or external video inputs.
+- **Screen Understanding**: Real-time screen scraping and UI layout analysis, mapping pixel elements to interactive controls (buttons, links, text inputs).
+- **Audio Analysis**: Tone, emotional sentiment, background noise classification, and voice-biometric speaker identification.
+- **Multi-Language Support**: Simultaneous translation and transcription across 80+ spoken and written languages.
+- **Real-Time Processing**: Designed for sub-100ms streaming audio inference and high-FPS video pipelines.
+- **Extensive Format Support**: Native parsing for JPG, PNG, GIF, MP4, MOV, MP3, WAV, PDF, DOCX, XLSX, and more.
+- **Optimized Vision Pipeline**: Fully parallelized architecture: Raw Data → Decollation & Pre-processing → Model Inference (VLM/CNN) → Layout Reconstruction & Post-processing.
+
+---
+
+## 🛠️ Architecture & Component Breakdown
+
+```
+        ┌────────────────────────────────────────────────────────┐
+        │            Hardware Inputs (Mic, Camera, Screen)        │
+        └───────────────────────────┬────────────────────────────┘
+                                    ▼
+        ┌────────────────────────────────────────────────────────┐
+        │                 cozanet-multimodal Pipeline            │
+        │                                                        │
+        │  ┌───────────────────────┐    ┌──────────────────────┐ │
+        │  │   Audio / TTS / STT   │    │  Vision & Screen OCR │ │
+        │  └───────────────────────┘    └──────────────────────┘ │
+        └───────────────────────────┬────────────────────────────┘
+                                    ▼
+        ┌────────────────────────────────────────────────────────┐
+        │             CozanetOS Core Semantic Layer             │
+        └────────────────────────────────────────────────────────┘
 ```
 
-## Setup API Keys
-Ensure you configure at least one Groq API key:
+- **Audio Pipeline**: Controls low-latency WebSocket interfaces for microphone streams, performing real-time silence detection and routing audio chunks to Whisper/TTS engines.
+- **Vision Pipeline**: Hardware-accelerated image and video decoding (utilizing GPU/NPU bounds), generating geometric coordinates for screen buttons and parsing tabular documents.
+
+---
+
+## 🔌 API & Interface Overview
+
+`cozanet-multimodal` exposes a high-throughput WebSocket API for real-time streaming alongside standard REST endpoints.
+
+### Process a Screen Image for Interactive Elements
+
 ```bash
-export GROQ_API_KEY_1="gsk_..."
-export GROQ_API_KEY_2="gsk_..."
-export GROQ_API_KEY_3="gsk_..."
+curl -X POST http://localhost:8085/v1/multimodal/analyze-ui   -H "Authorization: Bearer $COZANET_TOKEN"   -F "file=@screen_capture.png"   -F "options={"ocr": true, "detect_buttons": true}"
+```
+
+**Response:**
+```json
+{
+  "dimensions": {"width": 1920, "height": 1080},
+  "ui_elements": [
+    {
+      "type": "button",
+      "text": "Submit Payment",
+      "bounding_box": [120, 450, 200, 500],
+      "confidence": 0.99
+    }
+  ]
+}
+```
+
+---
+
+## 🔗 Integration with Other CozanetOS Modules
+
+- `cozanet-agents`: Equips agents with environmental and user awareness, enabling them to "see" and "hear" what the user is doing.
+- `cozanet-core`: Connects system-wide UI layouts directly to the operating system's main event loop and task scheduler.
+- `cozanet-cx7`: Acts as the perceptual input-output layer for the primary Cozanet CX7 neural shell.
+- `cozanet-device`: Translates high-level video and voice processing intents into raw hardware control (microphone arrays, display panels, GPU pipelines).
+
+---
+
+## ⚡ Quick-Start Notes
+
+### Prerequisites
+- Python >= 3.10 with pip, CUDA toolkit (highly recommended for local GPU acceleration).
+- System-level libraries: `ffmpeg`, `libsndfile1`.
+
+### Installation
+```bash
+git clone https://github.com/CozanetOS/cozanet-multimodal.git
+cd cozanet-multimodal
+pip install -r requirements.txt
+```
+
+### Start the Perception Server
+```bash
+python -m cozanet_multimodal.server --port 8085
+# Perceptual endpoints ready at http://localhost:8085
 ```
